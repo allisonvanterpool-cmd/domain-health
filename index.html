@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sender Domain Health — Modern Classrooms Project</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mcp-blue: #0a5395;
+    --mcp-blue-light: #e8f1f9;
+    --mcp-orange: #ee5938;
+    --mcp-orange-light: #fdf0ed;
+    --green: #2d7d32;
+    --green-light: #eaf4ea;
+    --amber: #b45309;
+    --amber-light: #fef3e2;
+    --red: #b91c1c;
+    --red-light: #fef2f2;
+    --gray: #64748b;
+    --gray-light: #f8fafc;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lora', Georgia, serif;
+    background: #f4f7fb;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .site-header {
+    background: var(--mcp-blue);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(10,83,149,0.18);
+  }
+
+  .site-header .logo {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #fff;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+  }
+
+  .site-header .logo span { color: #f9c88a; }
+
+  .header-meta {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 0.04em;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .page-title {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--mcp-blue);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin-bottom: 0.35rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 1.75rem;
+  }
+
+  .updated-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .updated-label {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .updated-date {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--mcp-blue);
+  }
+
+  .legend {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .table-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-bottom: 2rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  thead tr {
+    background: var(--gray-light);
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0.75rem 1.1rem;
+    text-align: left;
+  }
+
+  td {
+    padding: 0.65rem 1.1rem;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafcff; }
+
+  .domain-name {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .score-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .score-num {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    min-width: 32px;
+    color: var(--text);
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 5px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    min-width: 40px;
+  }
+
+  .bar-fill { height: 100%; border-radius: 99px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 99px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  .badge-Great  { background: var(--green-light); color: var(--green); }
+  .badge-Low    { background: var(--amber-light); color: var(--amber); }
+  .badge-Bad    { background: var(--red-light); color: var(--red); }
+  .badge-NA     { background: #f1f5f9; color: var(--gray); }
+  .badge-NoSeq  { background: var(--mcp-blue-light); color: var(--mcp-blue); }
+
+  .bar-Great { background: #4caf50; }
+  .bar-Low   { background: #f59e0b; }
+  .bar-Bad   { background: #ef4444; }
+  .bar-NA    { background: #cbd5e1; }
+  .bar-NoSeq { background: var(--mcp-blue); }
+
+  .bounce-warn {
+    color: var(--red);
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+  }
+
+  .bounce-ok {
+    color: var(--text-muted);
+    font-family: 'Barlow Semi Condensed', sans-serif;
+  }
+
+  col.col-domain { width: 44%; }
+  col.col-score  { width: 36%; }
+  col.col-bounce { width: 20%; }
+
+  .notices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .notice {
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .notice-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+  }
+
+  .notice-blue {
+    background: var(--mcp-blue-light);
+    border-left: 3px solid var(--mcp-blue);
+    color: #0a3a6b;
+  }
+
+  .notice-orange {
+    background: var(--mcp-orange-light);
+    border-left: 3px solid var(--mcp-orange);
+    color: #8b2e18;
+  }
+
+  .notice strong {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .notice a { color: var(--mcp-blue); font-style: italic; font-weight: 500; }
+  .notice-orange a { color: #8b2e18; }
+
+  .page-footer {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+    font-style: italic;
+  }
+
+  .page-footer a { color: var(--mcp-blue); }
+
+  @media (max-width: 600px) {
+    .page-title { font-size: 1.5rem; }
+    .container { padding: 1.5rem 1rem 3rem; }
+    th, td { padding: 0.6rem 0.75rem; }
+    col.col-domain { width: 40%; }
+    col.col-score  { width: 35%; }
+    col.col-bounce { width: 25%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="#" class="logo">Modern Classrooms <span>RevOps</span></a>
+  <span class="header-meta">Internal Sales Resource</span>
+</header>
+
+<div class="container">
+
+  <h1 class="page-title">Sender Domain Health</h1>
+  <p class="page-subtitle">Cold outreach mailbox deliverability — updated 3× per week</p>
+
+  <div class="updated-bar">
+    <span class="updated-label">Last updated</span>
+    <div style="display:flex; align-items:center; gap:1.25rem;">
+      <span class="updated-date" id="lastUpdated">May 11, 2026</span>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#4caf50;"></span>Great (80%+)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span>Low (50–79%)</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span>Bad (&lt;50%)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <colgroup>
+        <col class="col-domain">
+        <col class="col-score">
+        <col class="col-bounce">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Domain</th>
+          <th>Sender score</th>
+          <th>Bounce rate</th>
+        </tr>
+      </thead>
+      <tbody id="domainTable"></tbody>
+    </table>
+  </div>
+
+  <div class="notices">
+
+    <div class="notice notice-blue">
+      <span class="notice-icon">📋</span>
+      <div>
+        <strong>Check this page before setting up inbox rotation</strong>
+        Before adding contacts to a sequence with rotation enabled, confirm that your assigned front-runner domains show <em>Great</em> status above. If any of your mailboxes are on a <em>Low</em> or <em>Bad</em> domain, remove them from rotation and contact Allison — she'll swap in a backup.
+        &nbsp;<a href="https://docs.google.com/document/d/1SmhEyvHWr4WtxItam7JRNln914kildRrxnAa767xLLY/edit?tab=t.0#heading=h.yd67c42o3nm7" target="_blank">→ Full Multi-Inbox Strategy Guide</a>
+      </div>
+    </div>
+
+    <div class="notice notice-orange">
+      <span class="notice-icon">⚠️</span>
+      <div>
+        <strong>You cannot change senders once a sequence has started</strong>
+        Switching inboxes mid-sequence is flagged as spoofing by Gmail and Outlook — it's one of the fastest ways to damage deliverability for the entire team. If a contact is already enrolled and their assigned mailbox becomes a problem, <em>remove that contact from the sequence entirely</em>, then re-enroll them through a healthy mailbox in a new sequence.
+      </div>
+    </div>
+
+  </div>
+
+  <p class="page-footer">
+    Questions about your mailbox setup? Contact <a href="mailto:allison@modernclassrooms.org">Allison</a>. &nbsp;·&nbsp;
+    <a href="https://docs.google.com/document/d/1SmhEyvHWr4WtxItam7JRNln914kildRrxnAa767xLLY/edit?tab=t.0#heading=h.yd67c42o3nm7" target="_blank">Multi-Inbox Strategy Guide</a>
+  </p>
+
+</div>
+
+<script>
+// ─── UPDATE THIS DATA 3× PER WEEK ───────────────────────────────────────────
+const LAST_UPDATED = "May 11, 2026";
+
+const DOMAINS = [
+  // [domain, score (null = N/A), status, bounceRate]
+  ["modernclassrooms.org",        97, "NoSeq", 0],
+  ["trymodernclass.com",          91, "Great", 0],
+  ["gomodernclassroom.com",       91, "Great", 0],
+  ["topmodernclassrooms.com",     91, "Great", 0],
+  ["sendmodernclassroom.com",     91, "Great", 0],
+  ["trymodernclassrooms.com",     89, "Great", 0],
+  ["startmodernclassrooms.com",   87, "Great", 0],
+  ["hellomodernclassroom.com",    85, "Great", 1.5],
+  ["joinmodernclassrooms.com",    84, "Great", 0],
+  ["connectmodernclassrooms.com", 80, "Great", 0],
+  ["himodernclassrooms.com",      80, "Great", 0],
+  ["trymodernclassroom.com",      78, "Low",   0],
+  ["withmodernclassrooms.com",    75, "Low",   3.6],
+  ["getmodernclassrooms.com",     59, "Low",   5.4],
+  ["joinmodernclassroom.com",     49, "Low",   5.9],
+  ["hellomodernclassrooms.com",   48, "Low",   6.5],
+  ["getmodernclassroom.com",      47, "Low",   9.1],
+  ["withmodernclassroom.com",     43, "Low",   13.0],
+  ["himodernclassroom.com",       43, "Low",   10.2],
+  ["connectmodernclassroom.com",  41, "Low",   8.6],
+  ["gomodernclassrooms.com",      37, "Bad",   14.5],
+];
+// ────────────────────────────────────────────────────────────────────────────
+
+document.getElementById("lastUpdated").textContent = LAST_UPDATED;
+
+const tbody = document.getElementById("domainTable");
+
+DOMAINS.forEach(([domain, score, status, bounce]) => {
+  const scoreDisplay = score !== null ? score + "%" : "—";
+  const barWidth     = score !== null ? score + "%" : "0%";
+  const bounceStr    = bounce === 0 ? "0%" : bounce.toFixed(1) + "%";
+  const highBounce   = bounce >= 5;
+
+  tbody.innerHTML += `
+    <tr>
+      <td><span class="domain-name" title="${domain}">${domain}</span></td>
+      <td>
+        <div class="score-cell">
+          <span class="score-num">${scoreDisplay}</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-${status}" style="width:${barWidth};"></div>
+          </div>
+          <span class="badge badge-${status}">${status === "NA" ? "N/A" : status === "NoSeq" ? "No Seq" : status}</span>
+        </div>
+      </td>
+      <td class="${highBounce ? 'bounce-warn' : 'bounce-ok'}">${bounceStr}</td>
+    </tr>`;
+});
+</script>
+
+</body>
+</html>
